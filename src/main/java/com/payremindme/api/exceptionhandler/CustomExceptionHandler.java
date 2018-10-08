@@ -1,8 +1,10 @@
 package com.payremindme.api.exceptionhandler;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,7 +32,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
 
         String mensagemUsuario = messageSource.getMessage("mensagem.invalida",null, LocaleContextHolder.getLocale());
-        String mensagemTecnica = ex.getCause().toString();
+        String mensagemTecnica = ex.getCause() != null ? ex.getCause().toString() : ex.toString();
         List<ErrorMessage> errors = Collections.singletonList(new ErrorMessage(mensagemUsuario, mensagemTecnica));
 
         return handleExceptionInternal(ex,errors,headers,HttpStatus.BAD_REQUEST,request);
@@ -48,10 +50,21 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex , WebRequest webRequest){
 
         String mensagemUsuario = messageSource.getMessage("recurso.nao-encontrado",null, LocaleContextHolder.getLocale());
-        String mensagemTecnica = ex.toString();
+        String mensagemTecnica = ex.getCause() != null ? ex.getCause().toString() : ex.toString();
         List<ErrorMessage> errors = Collections.singletonList(new ErrorMessage(mensagemUsuario, mensagemTecnica));
 
         return handleExceptionInternal(ex,errors,new HttpHeaders(),HttpStatus.NOT_FOUND,webRequest);
+
+    }
+
+    @ExceptionHandler({DataIntegrityViolationException.class})
+    protected ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex , WebRequest webRequest){
+
+        String mensagemUsuario = messageSource.getMessage("recurso.operacao-nao-permitida",null, LocaleContextHolder.getLocale());
+        String mensagemTecnica = ExceptionUtils.getRootCauseMessage(ex);
+        List<ErrorMessage> errors = Collections.singletonList(new ErrorMessage(mensagemUsuario, mensagemTecnica));
+
+        return handleExceptionInternal(ex,errors,new HttpHeaders(),HttpStatus.BAD_REQUEST,webRequest);
 
     }
 
@@ -70,7 +83,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return errors;
     }
 
-    private static class ErrorMessage{
+    public static class ErrorMessage{
 
         private String mensagemUsuario;
         private String mensagemTecnica;
