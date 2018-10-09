@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -24,11 +25,13 @@ public class CategoriaController {
     private ApplicationEventPublisher publisher;
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_PESQUISAR_CATEGORIA')")
     public List<Categoria> findAll(){
         return  categoriaRepository.findAll();
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_CADASTRAR_CATEGORIA')")
     public ResponseEntity<Categoria> create(@RequestBody @Valid Categoria categoria, HttpServletResponse response){
         Categoria categoriaDb = categoriaRepository.save(categoria);
         publisher.publishEvent(new RecursoCriadoEvent(this,response,categoriaDb.getCodigo()));
@@ -36,6 +39,7 @@ public class CategoriaController {
     }
 
     @GetMapping("/{codigo}")
+    @PreAuthorize("hasAnyAuthority('ROLE_PESQUISAR_CATEGORIA')")
     public ResponseEntity<Categoria> find(@PathVariable Long codigo){
        Categoria categoriaDb = categoriaRepository.findById(codigo).orElse(null);
        return categoriaDb != null ? ResponseEntity.ok(categoriaDb) : ResponseEntity.notFound().build();
