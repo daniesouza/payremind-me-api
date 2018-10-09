@@ -16,23 +16,28 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler;
+import org.springframework.stereotype.Component;
 
 @Configuration
 @EnableWebSecurity
 @EnableResourceServer
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends ResourceServerConfigurerAdapter {
 
     @Autowired
     @Qualifier("appUserDetailsService")
     private UserDetailsService userDetailsService;
 
+    @Autowired
+    private PasswordEncoder userPasswordEncoder;
 
-    @Override
+
     @Autowired
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService);
+        auth.userDetailsService(userDetailsService).passwordEncoder(userPasswordEncoder);
     }
 
 
@@ -41,6 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
          // .cors().and()
             .authorizeRequests()
+            .antMatchers("/categorias").permitAll()
             .anyRequest().authenticated()
             .and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -49,14 +55,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
-
-    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Override
+    public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+        resources.stateless(true);
     }
 
     @Bean
@@ -64,10 +69,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new OAuth2MethodSecurityExpressionHandler();
     }
 
- /*    public static void main(String ...args){
+    /*    public static void main(String ...args){
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
         System.out.println(encoder.encode("@ngul@r0"));
+    }
+
+        @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .formLogin()
+                    .loginPage("/login").permitAll()
+                .and()
+                    .authorizeRequests().antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .and()
+                    .requestMatchers().antMatchers("/login", "/oauth/authorize", "/oauth/confirm_access")
+                .and()
+                    .authorizeRequests().anyRequest().authenticated();
     }
 
     @Bean
@@ -79,4 +97,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }*/
+
+     @Component
+     class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+
+        @Bean
+        @Override
+        public AuthenticationManager authenticationManagerBean() throws Exception {
+            return super.authenticationManagerBean();
+        }
+
+    }
 }

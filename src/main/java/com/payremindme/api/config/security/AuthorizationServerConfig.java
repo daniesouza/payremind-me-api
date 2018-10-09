@@ -57,4 +57,6 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         return new JwtTokenStore(getAccessTokenConverter());
     }
 
+
+
 }
