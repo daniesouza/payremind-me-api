@@ -29,7 +29,7 @@ public class Usuario implements Serializable {
     private String email;
 
     @NotNull
-    @Size(min = 3,max = 50)
+    @Size(min = 3,max = 150)
     @Column(name = "senha")
     private String senha;
 

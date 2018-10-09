@@ -12,14 +12,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -30,12 +24,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Qualifier("appUserDetailsService")
     private UserDetailsService userDetailsService;
 
+
+    @Override
     @Autowired
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService)
-            .passwordEncoder(passwordEncoder());
+        auth.userDetailsService(userDetailsService);
     }
-
 
 
     @Override
@@ -62,10 +56,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-   /*   public static void main(String ...args){
+ /*    public static void main(String ...args){
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-        System.out.println(encoder.encode("admin"));
+        System.out.println(encoder.encode("@ngul@r0"));
     }
 
   @Bean
