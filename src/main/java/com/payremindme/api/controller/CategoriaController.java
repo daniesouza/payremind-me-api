@@ -25,13 +25,13 @@ public class CategoriaController {
     private ApplicationEventPublisher publisher;
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_PESQUISAR_CATEGORIA')")
+    @PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA') and #oauth2.hasScope('read') ")
     public List<Categoria> findAll(){
         return  categoriaRepository.findAll();
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_CADASTRAR_CATEGORIA')")
+    @PreAuthorize("hasAuthority('ROLE_CADASTRAR_CATEGORIA') and #oauth2.hasScope('write') ")
     public ResponseEntity<Categoria> create(@RequestBody @Valid Categoria categoria, HttpServletResponse response){
         Categoria categoriaDb = categoriaRepository.save(categoria);
         publisher.publishEvent(new RecursoCriadoEvent(this,response,categoriaDb.getCodigo()));
@@ -39,15 +39,10 @@ public class CategoriaController {
     }
 
     @GetMapping("/{codigo}")
-    @PreAuthorize("hasAnyAuthority('ROLE_PESQUISAR_CATEGORIA')")
+    @PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA') and #oauth2.hasScope('read') ")
     public ResponseEntity<Categoria> find(@PathVariable Long codigo){
        Categoria categoriaDb = categoriaRepository.findById(codigo).orElse(null);
        return categoriaDb != null ? ResponseEntity.ok(categoriaDb) : ResponseEntity.notFound().build();
     }
 
-    @DeleteMapping("/{codigo}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long codigo){
-        categoriaRepository.deleteById(codigo);
-    }
 }

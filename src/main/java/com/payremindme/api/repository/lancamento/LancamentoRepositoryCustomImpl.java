@@ -2,6 +2,7 @@ package com.payremindme.api.repository.lancamento;
 
 import com.payremindme.api.model.Lancamento;
 import com.payremindme.api.repository.filter.LancamentoFilter;
+import com.payremindme.api.repository.projection.ResumoLancamento;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,33 @@ public class LancamentoRepositoryCustomImpl implements LancamentoRepositoryCusto
         return new PageImpl<>(query.getResultList(),pageable,total(lancamentoFilter));
     }
 
+    @Override
+    public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
+
+        CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
+        CriteriaQuery<ResumoLancamento> criteria = criteriaBuilder.createQuery(ResumoLancamento.class);
+        Root<Lancamento> root = criteria.from(Lancamento.class);
+
+        criteria.select(criteriaBuilder.construct(ResumoLancamento.class,
+                root.get("codigo"),
+                root.get("descricao"),
+                root.get("dataVencimento"),
+                root.get("dataPagamento"),
+                root.get("valor"),
+                root.get("tipo"),
+                root.get("categoria").get("nome"),
+                root.get("pessoa").get("nome")));
+
+        Predicate[] predicates = criarRestricoes(lancamentoFilter,criteriaBuilder,root);
+        criteria.where(predicates);
+
+        TypedQuery<ResumoLancamento> query = manager.createQuery(criteria);
+
+        adicionaRestricaoPaginacao(query,pageable);
+
+        return new PageImpl<>(query.getResultList(),pageable,total(lancamentoFilter));
+    }
+
     private Long total(LancamentoFilter lancamentoFilter) {
 
         CriteriaBuilder builder = manager.getCriteriaBuilder();
@@ -51,7 +79,7 @@ public class LancamentoRepositoryCustomImpl implements LancamentoRepositoryCusto
        return manager.createQuery(criteria).getSingleResult();
     }
 
-    private void adicionaRestricaoPaginacao(TypedQuery<Lancamento> query, Pageable pageable) {
+    private void adicionaRestricaoPaginacao(TypedQuery<?> query, Pageable pageable) {
         int paginaAtual = pageable.getPageNumber();
         int totalRegistrosPagina = pageable.getPageSize();
         int primeiroRegistroPagina = paginaAtual * totalRegistrosPagina;

@@ -1,5 +1,7 @@
 package com.payremindme.api.config.security;
 
+import com.payremindme.api.config.property.PayRemindMeApiProperty;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -16,8 +18,9 @@ import java.io.IOException;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CORSFilter implements Filter {
-    
-    private String origemPermitida = "http://localhost:8000";
+
+    @Autowired
+    private PayRemindMeApiProperty payRemindMeApiProperty;
 
     @Override
     public void destroy() {
@@ -31,11 +34,11 @@ public class CORSFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) resp;
         HttpServletRequest request = (HttpServletRequest) req;
 
-        response.setHeader("Access-Control-Allow-Origin", origemPermitida);
+        response.setHeader("Access-Control-Allow-Origin", payRemindMeApiProperty.getOrigemPermitida());
         response.setHeader("Access-Control-Allow-Credentials", "true");
 
         
-        if("OPTIONS".equalsIgnoreCase(request.getMethod()) && origemPermitida.equalsIgnoreCase(request.getHeader("Origin"))) {
+        if("OPTIONS".equalsIgnoreCase(request.getMethod()) && payRemindMeApiProperty.getOrigemPermitida().equalsIgnoreCase(request.getHeader("Origin"))) {
             response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
             response.setHeader("Access-Control-Max-Age", "3600");
             response.setHeader("Access-Control-Allow-Headers","Content-Type, Authorization, Accept");

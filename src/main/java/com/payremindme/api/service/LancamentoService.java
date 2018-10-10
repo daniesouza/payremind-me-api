@@ -7,6 +7,7 @@ import com.payremindme.api.model.Pessoa;
 import com.payremindme.api.repository.LancamentoRepository;
 import com.payremindme.api.repository.PessoaRepository;
 import com.payremindme.api.repository.filter.LancamentoFilter;
+import com.payremindme.api.repository.projection.ResumoLancamento;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -58,4 +59,7 @@ public class LancamentoService {
         lancamentoRepository.deleteById(codigo);
     }
 
+    public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
+        return lancamentoRepository.resumir(lancamentoFilter,pageable);
+    }
 }

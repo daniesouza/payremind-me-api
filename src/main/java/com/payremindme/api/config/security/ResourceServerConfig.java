@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 @EnableWebSecurity
 @EnableResourceServer
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfig extends ResourceServerConfigurerAdapter {
+public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Autowired
     @Qualifier("appUserDetailsService")
@@ -69,6 +69,7 @@ public class WebSecurityConfig extends ResourceServerConfigurerAdapter {
         return new OAuth2MethodSecurityExpressionHandler();
     }
 
+
     /*    public static void main(String ...args){
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -98,8 +99,8 @@ public class WebSecurityConfig extends ResourceServerConfigurerAdapter {
         return source;
     }*/
 
-     @Component
-     class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+    @Configuration
+    static class AuthenticationMananagerProvider extends WebSecurityConfigurerAdapter {
 
         @Bean
         @Override

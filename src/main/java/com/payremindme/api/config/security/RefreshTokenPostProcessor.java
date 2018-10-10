@@ -1,5 +1,7 @@
 package com.payremindme.api.config.security;
 
+import com.payremindme.api.config.property.PayRemindMeApiProperty;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -18,6 +20,9 @@ import javax.servlet.http.HttpServletResponse;
 //SERVE PARA COLOCAR O REFRESH TOKEN NO COOKIE DO RESPONSE E REMOVER DO BODY POR MOTIVOS DE SEGURANCA
 @ControllerAdvice
 public class RefreshTokenPostProcessor implements ResponseBodyAdvice<OAuth2AccessToken> {
+
+    @Autowired
+    private PayRemindMeApiProperty payRemindMeApiProperty;
 
     @Override
     public boolean supports(MethodParameter methodParameter, Class<? extends HttpMessageConverter<?>> aClass) {
@@ -47,7 +52,7 @@ public class RefreshTokenPostProcessor implements ResponseBodyAdvice<OAuth2Acces
     private void adicionarRefreshTokenCookie(String refreshToken, HttpServletRequest req, HttpServletResponse resp) {
         Cookie cookie = new Cookie("refresh_token",refreshToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // TODO mudar para true em HTTPS(producao)
+        cookie.setSecure(payRemindMeApiProperty.getSeguranca().isEnableHttps());
         cookie.setPath(req.getContextPath()+"/oauth/token");
         cookie.setMaxAge(2592000); // 30 dias
         resp.addCookie(cookie);
