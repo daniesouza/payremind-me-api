@@ -25,7 +25,7 @@ public class AppUserDetailsService implements UserDetailsService {
         Usuario usuarioDb = usuarioRepository.findByEmail(email).
                 orElseThrow(() -> new UsernameNotFoundException("Usuario ou senha incorretos"));
 
-        return new User(email,usuarioDb.getSenha(),buildRoles(usuarioDb));
+        return new UsuarioSistema(usuarioDb,buildRoles(usuarioDb));
     }
 
     private Collection<? extends GrantedAuthority> buildRoles(Usuario usuario) {
