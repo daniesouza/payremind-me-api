@@ -1,10 +1,15 @@
 package com.payremindme.api.controller;
 
+import com.payremindme.api.model.Lancamento;
+import com.payremindme.api.repository.filter.LancamentoFilter;
+import com.payremindme.api.repository.filter.PessoaFilter;
 import com.payremindme.api.service.PessoaService;
 import com.payremindme.api.event.RecursoCriadoEvent;
 import com.payremindme.api.model.Pessoa;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,9 +31,9 @@ public class PessoaController {
     private ApplicationEventPublisher publisher;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read') ")
-    public List<Pessoa> findAll(){
-        return  pessoaService.findAll();
+    @PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read') ")
+    public Page<Pessoa> findAllByFilter(PessoaFilter pessoaFilter, Pageable pageable){
+        return  pessoaService.findAllByFilter(pessoaFilter,pageable);
     }
 
     @PostMapping

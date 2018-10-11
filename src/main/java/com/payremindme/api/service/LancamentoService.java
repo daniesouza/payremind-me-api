@@ -40,17 +40,19 @@ public class LancamentoService {
     }
 
     public Lancamento save(Lancamento lancamento){
-        Pessoa pessoaDb = pessoaRepository.findById(lancamento.getPessoa().getCodigo()).orElseThrow(PessoaInexistenteException::new);
-
-        if(!pessoaDb.getAtivo()){
-            throw new PessoaInativaException();
-        }
-
+        validarPessoa(lancamento);
         return lancamentoRepository.save(lancamento);
     }
 
+
+
     public Lancamento update(Long codigo, Lancamento lancamento){
         Lancamento lancamentoDb = lancamentoRepository.findById(codigo).orElseThrow(() -> new EmptyResultDataAccessException(1));
+
+        if(!lancamento.getPessoa().equals(lancamentoDb.getPessoa())){
+            validarPessoa(lancamento);
+        }
+
         BeanUtils.copyProperties(lancamento,lancamentoDb,"codigo");
         return lancamentoRepository.save(lancamentoDb);
     }
@@ -61,5 +63,13 @@ public class LancamentoService {
 
     public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
         return lancamentoRepository.resumir(lancamentoFilter,pageable);
+    }
+
+    private void validarPessoa(Lancamento lancamento) {
+        Pessoa pessoaDb = pessoaRepository.findById(lancamento.getPessoa().getCodigo()).orElseThrow(PessoaInexistenteException::new);
+
+        if(!pessoaDb.getAtivo()){
+            throw new PessoaInativaException();
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.payremindme.api.repository.lancamento;
+package com.payremindme.api.repository.custom;
 
 import com.payremindme.api.model.Lancamento;
 import com.payremindme.api.repository.filter.LancamentoFilter;

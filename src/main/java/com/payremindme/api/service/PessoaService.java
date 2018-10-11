@@ -2,9 +2,12 @@ package com.payremindme.api.service;
 
 import com.payremindme.api.model.Pessoa;
 import com.payremindme.api.repository.PessoaRepository;
+import com.payremindme.api.repository.filter.PessoaFilter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,5 +45,9 @@ public class PessoaService {
         Pessoa pessoaDb = find(codigo);
         pessoaDb.setAtivo(ativo);
         save(pessoaDb);
+    }
+
+    public Page<Pessoa> findAllByFilter(PessoaFilter pessoaFilter, Pageable pageable) {
+        return  pessoaRepository.findAllByFilter(pessoaFilter,pageable);
     }
 }
