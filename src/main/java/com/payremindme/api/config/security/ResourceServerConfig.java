@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler;
+import org.springframework.stereotype.Component;
 
 @Configuration
 @EnableWebSecurity
@@ -71,9 +72,9 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     }
 
 
-    //  @Profile("oauth-security")
-    @Configuration
-    static class AuthenticationMananagerProvider extends WebSecurityConfigurerAdapter {
+    @Profile("oauth-security")
+    @Component
+    class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
         @Bean
         @Override
