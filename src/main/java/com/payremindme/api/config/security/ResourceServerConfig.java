@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -25,7 +24,7 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 @EnableWebSecurity
 @EnableResourceServer
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@Profile("oauth-security")
+//@Profile("oauth-security")
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Autowired
@@ -71,7 +70,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     }
 
 
-    @Profile("oauth-security")
+  //  @Profile("oauth-security")
     @Configuration
     static class AuthenticationMananagerProvider extends WebSecurityConfigurerAdapter {
 
