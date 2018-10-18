@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 
 @Profile("oauth-security")
 @Configuration
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Override
