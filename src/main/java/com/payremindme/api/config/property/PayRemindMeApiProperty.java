@@ -2,7 +2,7 @@ package com.payremindme.api.config.property;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("payremind-me")
+@ConfigurationProperties("payremindme")
 public class PayRemindMeApiProperty {
 
     private String origemPermitida = "http://localhost:8000";
