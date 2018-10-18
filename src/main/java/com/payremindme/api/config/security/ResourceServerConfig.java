@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 import org.springframework.stereotype.Component;
 
 @Configuration
-@Component
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Override
