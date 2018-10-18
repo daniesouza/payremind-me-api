@@ -16,18 +16,16 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
-                .antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/swagger-ui.html", "/webjars/**").permitAll()
+        http.authorizeRequests()
+                .antMatchers("/categorias").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .csrf().disable();
     }
 
     @Override
-    public void configure(ResourceServerSecurityConfigurer resources) {
+    public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
         resources.stateless(true);
     }
 
