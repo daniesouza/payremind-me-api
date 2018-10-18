@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 //SERVE PARA COLOCAR O REFRESH TOKEN NO COOKIE DO RESPONSE E REMOVER DO BODY POR MOTIVOS DE SEGURANCA
-@Profile("oauth-security")
 @ControllerAdvice
 public class RefreshTokenPostProcessor implements ResponseBodyAdvice<OAuth2AccessToken> {
 
