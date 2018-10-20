@@ -1,11 +1,9 @@
 package com.payremindme.api.controller;
 
-import com.payremindme.api.model.Lancamento;
-import com.payremindme.api.repository.filter.LancamentoFilter;
-import com.payremindme.api.repository.filter.PessoaFilter;
-import com.payremindme.api.service.PessoaService;
 import com.payremindme.api.event.RecursoCriadoEvent;
 import com.payremindme.api.model.Pessoa;
+import com.payremindme.api.repository.filter.PessoaFilter;
+import com.payremindme.api.service.PessoaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.List;
 
 
 @RestController
