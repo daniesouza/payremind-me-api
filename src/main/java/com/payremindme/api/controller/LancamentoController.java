@@ -1,5 +1,6 @@
 package com.payremindme.api.controller;
 
+import com.payremindme.api.dto.Anexo;
 import com.payremindme.api.dto.LancamentoEstatisticaDTO;
 import com.payremindme.api.dto.LancamentoEstatisticaDiaDTO;
 import com.payremindme.api.event.RecursoCriadoEvent;
@@ -10,6 +11,7 @@ import com.payremindme.api.model.Lancamento;
 import com.payremindme.api.repository.filter.LancamentoFilter;
 import com.payremindme.api.repository.projection.ResumoLancamento;
 import com.payremindme.api.service.LancamentoService;
+import com.payremindme.api.storage.StorageS3;
 import net.sf.jasperreports.engine.JRException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -25,7 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
-
+import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.time.LocalDate;
@@ -45,6 +47,9 @@ public class LancamentoController {
 
     @Autowired
     private MessageSource messageSource;
+
+    @Autowired
+    private StorageS3 storageS3;
 
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read') ")
@@ -119,5 +124,11 @@ public class LancamentoController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
                 .body(relatorioBytes);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write') ")
+    @PostMapping("/anexo")
+    public Anexo uploadAnexo(@RequestParam MultipartFile anexo) {
+        return storageS3.saveTemporary(anexo);
     }
 }

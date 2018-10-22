@@ -1,5 +1,9 @@
 package com.payremindme.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.payremindme.api.repository.listener.LancamentoAnexoListener;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -8,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@EntityListeners(LancamentoAnexoListener.class)
 @Entity
 @Table(name = "lancamento")
 public class Lancamento implements Serializable {
@@ -45,11 +50,38 @@ public class Lancamento implements Serializable {
     @JoinColumn(name = "codigo_categoria")
     private Categoria categoria;
 
+    @JsonIgnoreProperties("contatos")
     @NotNull
     @ManyToOne
     @JoinColumn(name = "codigo_pessoa")
     private Pessoa pessoa;
 
+    @Column(name = "anexo")
+    private String anexo;
+
+    @Transient
+    private String urlAnexo;
+
+    @JsonIgnore
+    public boolean isReceita(){
+        return TipoLancamento.RECEITA.equals(this.tipo);
+    }
+
+    public String getAnexo() {
+        return anexo;
+    }
+
+    public void setAnexo(String anexo) {
+        this.anexo = anexo;
+    }
+
+    public String getUrlAnexo() {
+        return urlAnexo;
+    }
+
+    public void setUrlAnexo(String urlAnexo) {
+        this.urlAnexo = urlAnexo;
+    }
 
     public Long getCodigo() {
         return codigo;

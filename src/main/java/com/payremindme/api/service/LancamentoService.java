@@ -5,23 +5,30 @@ import com.payremindme.api.dto.LancamentoEstatisticaDiaDTO;
 import com.payremindme.api.dto.LancamentoEstatisticaPessoa;
 import com.payremindme.api.exception.PessoaInativaException;
 import com.payremindme.api.exception.PessoaInexistenteException;
+import com.payremindme.api.mail.Mailer;
 import com.payremindme.api.model.Lancamento;
 import com.payremindme.api.model.Pessoa;
+import com.payremindme.api.model.Usuario;
 import com.payremindme.api.repository.LancamentoRepository;
 import com.payremindme.api.repository.PessoaRepository;
+import com.payremindme.api.repository.UsuarioRepository;
 import com.payremindme.api.repository.filter.LancamentoFilter;
 import com.payremindme.api.repository.projection.ResumoLancamento;
+import com.payremindme.api.storage.StorageS3;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.InputStream;
 import java.sql.Date;
@@ -34,11 +41,22 @@ import java.util.Map;
 @Service
 public class LancamentoService {
 
+    private static final Logger logger = LoggerFactory.getLogger(LancamentoService.class);
+
     @Autowired
     private LancamentoRepository lancamentoRepository;
 
     @Autowired
     private PessoaRepository pessoaRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private Mailer mailer;
+
+    @Autowired
+    private StorageS3 storageS3;
 
     public Page<Lancamento> findAllByFilter(LancamentoFilter lancamentoFilter, Pageable pageable) {
         return lancamentoRepository.findAllByFilter(lancamentoFilter, pageable);
@@ -49,12 +67,16 @@ public class LancamentoService {
     }
 
     public Lancamento find(Long codigo) {
-        Lancamento lancamentoDb = lancamentoRepository.findById(codigo).orElseThrow(() -> new EmptyResultDataAccessException(1));
-        return lancamentoDb;
+        return lancamentoRepository.findById(codigo).orElseThrow(() -> new EmptyResultDataAccessException(1));
     }
 
     public Lancamento save(Lancamento lancamento) {
         validarPessoa(lancamento);
+
+        if (StringUtils.hasText(lancamento.getAnexo())) {
+            storageS3.save(lancamento.getAnexo());
+        }
+
         return lancamentoRepository.save(lancamento);
     }
 
@@ -64,6 +86,13 @@ public class LancamentoService {
 
         if (!lancamento.getPessoa().equals(lancamentoDb.getPessoa())) {
             validarPessoa(lancamento);
+        }
+
+        if (StringUtils.isEmpty(lancamento.getAnexo()) && StringUtils.hasText(lancamentoDb.getAnexo())) {
+            storageS3.delete(lancamentoDb.getAnexo());
+        }else if(StringUtils.hasText(lancamento.getAnexo())
+        && !lancamento.getAnexo().equals(lancamentoDb.getAnexo())){
+            storageS3.update(lancamentoDb.getAnexo(),lancamento.getAnexo());
         }
 
         BeanUtils.copyProperties(lancamento, lancamentoDb, "codigo");
@@ -97,14 +126,14 @@ public class LancamentoService {
     public byte[] relatorioPorPessoa(LocalDate inicio, LocalDate fim) throws JRException {
 
         List<LancamentoEstatisticaPessoa> lancamentoEstatisticaPessoas = listPorPessoa(inicio, fim);
-        Map<String,Object> parametros = new HashMap<>();
+        Map<String, Object> parametros = new HashMap<>();
         parametros.put("DT_INICIO", Date.valueOf(inicio));
         parametros.put("DT_FIM", Date.valueOf(fim));
-        parametros.put("REPORT_LOCALE", new Locale("pt","BR"));
+        parametros.put("REPORT_LOCALE", new Locale("pt", "BR"));
 
         InputStream inputStream = this.getClass().getResourceAsStream("/relatorios/lancamentos-por-pessoa.jasper");
 
-        JasperPrint jasperPrint = JasperFillManager.fillReport(inputStream,parametros,
+        JasperPrint jasperPrint = JasperFillManager.fillReport(inputStream, parametros,
                 new JRBeanCollectionDataSource(lancamentoEstatisticaPessoas));
 
         return JasperExportManager.exportReportToPdf(jasperPrint);
@@ -112,5 +141,31 @@ public class LancamentoService {
 
     private List<LancamentoEstatisticaPessoa> listPorPessoa(LocalDate inicio, LocalDate fim) {
         return lancamentoRepository.listPorPessoa(inicio, fim);
+    }
+
+    //@Scheduled(cron = "0 0 6 * * *")
+    // @Scheduled(fixedDelay = 1000*60*30)
+    public void avisarLancamentoVencido() {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Preparando envio de emails de lancamentos vencidos");
+        }
+        List<Lancamento> vencidos = lancamentoRepository.findByDataVencimentoLessThanEqualAndDataPagamentoIsNull(LocalDate.now());
+
+        if (vencidos.isEmpty()) {
+            logger.info("Sem lancamentos vencidos para envio");
+            return;
+        }
+
+        logger.info("Existem {} lancamentos vencidos", vencidos.size());
+
+        List<Usuario> destinatarios = usuarioRepository.findByPermissoesDescricao("ROLE_PESQUISAR_LANCAMENTO");
+
+        if (destinatarios.isEmpty()) {
+            logger.warn("Sem destinatarios cadastrados para envio de email");
+            return;
+        }
+
+        mailer.enviarEmailLancamentosVencidos(vencidos, destinatarios);
+        logger.info("Envio de email de lancamentos vencidos enviado para {} destinatarios", destinatarios.size());
     }
 }

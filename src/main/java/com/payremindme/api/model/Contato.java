@@ -3,18 +3,17 @@ package com.payremindme.api.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
-import javax.validation.Valid;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "pessoa")
-public class Pessoa implements Serializable {
+@Table(name = "contato")
+public class Contato implements Serializable {
 
-    private static final long serialVersionUID = 5556524396546406013L;
+    private static final long serialVersionUID = -7336072943343786850L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,15 +25,18 @@ public class Pessoa implements Serializable {
     private String nome;
 
     @NotNull
-    private Boolean ativo;
+    @Email
+    @Column(name = "email")
+    private String email;
 
-    @Embedded
-    private Endereco endereco;
+    @NotNull
+    @Size(min = 8,max = 100)
+    @Column(name = "telefone")
+    private String telefone;
 
-    @JsonIgnoreProperties("pessoa")
-    @Valid
-    @OneToMany(mappedBy = "pessoa",cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<Contato> contatos;
+    @ManyToOne
+    @JoinColumn(name = "codigo_pessoa")
+    private Pessoa pessoa;
 
     public Long getCodigo() {
         return codigo;
@@ -52,36 +54,36 @@ public class Pessoa implements Serializable {
         this.nome = nome;
     }
 
-    public Boolean getAtivo() {
-        return ativo;
+    public String getEmail() {
+        return email;
     }
 
-    public void setAtivo(Boolean ativo) {
-        this.ativo = ativo;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public Endereco getEndereco() {
-        return endereco;
+    public String getTelefone() {
+        return telefone;
     }
 
-    public void setEndereco(Endereco endereco) {
-        this.endereco = endereco;
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
     }
 
-    public List<Contato> getContatos() {
-        return contatos;
+    public Pessoa getPessoa() {
+        return pessoa;
     }
 
-    public void setContatos(List<Contato> contatos) {
-        this.contatos = contatos;
+    public void setPessoa(Pessoa pessoa) {
+        this.pessoa = pessoa;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Pessoa categoria = (Pessoa) o;
-        return Objects.equals(codigo, categoria.codigo);
+        Contato contato = (Contato) o;
+        return Objects.equals(codigo, contato.codigo);
     }
 
     @Override
