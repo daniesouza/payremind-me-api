@@ -1,7 +1,11 @@
 package com.payremindme.api.model;
 
+import javax.persistence.Embeddable;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.io.Serializable;
 
+@Embeddable
 public class Endereco implements Serializable {
 
     private static final long serialVersionUID = 2355832767421280002L;
@@ -10,8 +14,10 @@ public class Endereco implements Serializable {
     private String complemento;
     private String bairro;
     private String cep;
-    private String cidade;
-    private String estado;
+
+    @ManyToOne
+    @JoinColumn(name = "codigo_cidade")
+    private Cidade cidade;
 
 
     public String getLogradouro() {
@@ -54,19 +60,12 @@ public class Endereco implements Serializable {
         this.cep = cep;
     }
 
-    public String getCidade() {
+    public Cidade getCidade() {
         return cidade;
     }
 
-    public void setCidade(String cidade) {
+    public void setCidade(Cidade cidade) {
         this.cidade = cidade;
     }
 
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
 }

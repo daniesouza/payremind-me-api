@@ -86,8 +86,7 @@ public class StorageS3 {
     }
 
     public String configurarURL(String object) {
-        return "\\\\" + property.getAmazonS3().getBucket() +
-                ".s3.amazomws.com/" + object;
+        return "https:\\\\s3-sa-east-1.amazonaws.com/" + property.getAmazonS3().getBucket() + "/" + object;
     }
 
     private String gerarNomeUnico(String originalFilename) {
