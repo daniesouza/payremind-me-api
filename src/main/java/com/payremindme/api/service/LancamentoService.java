@@ -27,12 +27,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.Schedules;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.InputStream;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -90,9 +94,9 @@ public class LancamentoService {
 
         if (StringUtils.isEmpty(lancamento.getAnexo()) && StringUtils.hasText(lancamentoDb.getAnexo())) {
             storageS3.delete(lancamentoDb.getAnexo());
-        }else if(StringUtils.hasText(lancamento.getAnexo())
-        && !lancamento.getAnexo().equals(lancamentoDb.getAnexo())){
-            storageS3.update(lancamentoDb.getAnexo(),lancamento.getAnexo());
+        } else if (StringUtils.hasText(lancamento.getAnexo())
+                && !lancamento.getAnexo().equals(lancamentoDb.getAnexo())) {
+            storageS3.update(lancamentoDb.getAnexo(), lancamento.getAnexo());
         }
 
         BeanUtils.copyProperties(lancamento, lancamentoDb, "codigo");
@@ -143,10 +147,18 @@ public class LancamentoService {
         return lancamentoRepository.listPorPessoa(inicio, fim);
     }
 
-    //@Scheduled(cron = "0 0 6 * * *")
+    //  private static final String TIME_ZONE = "America/Sao_Paulo";
+
+
     // @Scheduled(fixedDelay = 1000*60*30)
+    @Schedules({
+            @Scheduled(cron = "00 00 18 * * *"),
+            @Scheduled(cron = "00 00 19 * * *"),
+            @Scheduled(cron = "00 00 20 * * *")
+    })
     public void avisarLancamentoVencido() {
         if (logger.isDebugEnabled()) {
+            LocalDateTime.now();
             logger.debug("Preparando envio de emails de lancamentos vencidos");
         }
         List<Lancamento> vencidos = lancamentoRepository.findByDataVencimentoLessThanEqualAndDataPagamentoIsNull(LocalDate.now());
