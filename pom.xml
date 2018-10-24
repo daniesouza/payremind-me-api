@@ -169,11 +169,15 @@
         <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk -->
         <dependency>
             <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk</artifactId>
+            <artifactId>aws-java-sdk-s3</artifactId>
             <version>1.11.433</version>
         </dependency>
 
-
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-core</artifactId>
+            <version>1.11.433</version>
+        </dependency>
 
     </dependencies>
 
