@@ -1,4 +1,4 @@
-package com.payremindme.api.storage;
+package com.payremindme.api.amazon;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
@@ -20,12 +20,14 @@ public class StorageS3 {
 
     private static final Logger logger = LoggerFactory.getLogger(StorageS3.class);
 
-
-    @Autowired
     private AmazonS3 amazonS3;
+    private PayRemindMeApiProperty property;
 
     @Autowired
-    private PayRemindMeApiProperty property;
+    public StorageS3(AmazonS3 amazonS3, PayRemindMeApiProperty property){
+        this.amazonS3 = amazonS3;
+        this.property = property;
+    }
 
     public Anexo saveTemporary(MultipartFile arquivo) {
         AccessControlList acl = new AccessControlList();
@@ -52,9 +54,7 @@ public class StorageS3 {
                 logger.debug("Arquivo {} enviado com sucesso para o S3.", nomeUnico);
             }
 
-            Anexo anexo = new Anexo(nomeUnico, configurarURL(nomeUnico));
-
-            return anexo;
+            return new Anexo(nomeUnico, configurarURL(nomeUnico));
 
         } catch (IOException e) {
             throw new RuntimeException("Falha ao enviar arquivo para o Amazom S3", e);

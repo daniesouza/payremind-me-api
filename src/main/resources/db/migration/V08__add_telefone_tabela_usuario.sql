@@ -1,0 +1,1 @@
+ALTER TABLE usuario ADD telefone varchar(15) NULL;

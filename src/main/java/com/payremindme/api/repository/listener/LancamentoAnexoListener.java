@@ -2,7 +2,7 @@ package com.payremindme.api.repository.listener;
 
 import com.payremindme.api.PayremindMeApiApplication;
 import com.payremindme.api.model.Lancamento;
-import com.payremindme.api.storage.StorageS3;
+import com.payremindme.api.amazon.StorageS3;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.PostLoad;

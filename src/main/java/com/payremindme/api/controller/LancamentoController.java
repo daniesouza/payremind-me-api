@@ -11,7 +11,7 @@ import com.payremindme.api.model.Lancamento;
 import com.payremindme.api.repository.filter.LancamentoFilter;
 import com.payremindme.api.repository.projection.ResumoLancamento;
 import com.payremindme.api.service.LancamentoService;
-import com.payremindme.api.storage.StorageS3;
+import com.payremindme.api.amazon.StorageS3;
 import net.sf.jasperreports.engine.JRException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;

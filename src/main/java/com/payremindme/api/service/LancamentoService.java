@@ -1,5 +1,6 @@
 package com.payremindme.api.service;
 
+import com.payremindme.api.amazon.SNSPublisher;
 import com.payremindme.api.dto.LancamentoEstatisticaDTO;
 import com.payremindme.api.dto.LancamentoEstatisticaDiaDTO;
 import com.payremindme.api.dto.LancamentoEstatisticaPessoa;
@@ -14,7 +15,7 @@ import com.payremindme.api.repository.PessoaRepository;
 import com.payremindme.api.repository.UsuarioRepository;
 import com.payremindme.api.repository.filter.LancamentoFilter;
 import com.payremindme.api.repository.projection.ResumoLancamento;
-import com.payremindme.api.storage.StorageS3;
+import com.payremindme.api.amazon.StorageS3;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -36,7 +37,6 @@ import java.io.InputStream;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -61,6 +61,9 @@ public class LancamentoService {
 
     @Autowired
     private StorageS3 storageS3;
+
+    @Autowired
+    private SNSPublisher snsPublisher;
 
     public Page<Lancamento> findAllByFilter(LancamentoFilter lancamentoFilter, Pageable pageable) {
         return lancamentoRepository.findAllByFilter(lancamentoFilter, pageable);
@@ -147,8 +150,6 @@ public class LancamentoService {
         return lancamentoRepository.listPorPessoa(inicio, fim);
     }
 
-    //  private static final String TIME_ZONE = "America/Sao_Paulo";
-
 
     // @Scheduled(fixedDelay = 1000*60*30)
     @Schedules({
@@ -157,11 +158,14 @@ public class LancamentoService {
             @Scheduled(cron = "00 00 20 * * *")
     })
     public void avisarLancamentoVencido() {
+
         if (logger.isDebugEnabled()) {
-            LocalDateTime.now();
-            logger.debug("Preparando envio de emails de lancamentos vencidos");
+            logger.debug("Preparando envio de lancamentos vencidos");
         }
+
+
         List<Lancamento> vencidos = lancamentoRepository.findByDataVencimentoLessThanEqualAndDataPagamentoIsNull(LocalDate.now());
+        List<Usuario> destinatarios = usuarioRepository.findByPermissoesDescricao("ROLE_PESQUISAR_LANCAMENTO");
 
         if (vencidos.isEmpty()) {
             logger.info("Sem lancamentos vencidos para envio");
@@ -170,14 +174,24 @@ public class LancamentoService {
 
         logger.info("Existem {} lancamentos vencidos", vencidos.size());
 
-        List<Usuario> destinatarios = usuarioRepository.findByPermissoesDescricao("ROLE_PESQUISAR_LANCAMENTO");
-
         if (destinatarios.isEmpty()) {
             logger.warn("Sem destinatarios cadastrados para envio de email");
             return;
         }
 
+        enviarEmailLancamentoVencido(vencidos, destinatarios);
+        enviarSMSLancamentoVencido(vencidos, destinatarios);
+    }
+
+    private void enviarSMSLancamentoVencido(List<Lancamento> vencidos, List<Usuario> destinatarios) {
+        logger.info("Enviando mensagem de SMS  para {} destinatarios ", destinatarios.size());
+        snsPublisher.enviarSMSLancamentosVencidos(vencidos, destinatarios);
+        logger.info("Mensagem de SMS enviada com sucesso para {} destinatarios", destinatarios.size());
+    }
+
+    private void enviarEmailLancamentoVencido(List<Lancamento> vencidos, List<Usuario> destinatarios) {
+        logger.info("Enviando de email de lancamentos vencidos enviado para {} destinatarios", destinatarios.size());
         mailer.enviarEmailLancamentosVencidos(vencidos, destinatarios);
-        logger.info("Envio de email de lancamentos vencidos enviado para {} destinatarios", destinatarios.size());
+        logger.info("Email enviado com sucesso para {} destinatarios", destinatarios.size());
     }
 }

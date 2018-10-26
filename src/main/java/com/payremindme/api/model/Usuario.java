@@ -33,6 +33,11 @@ public class Usuario implements Serializable {
     @Column(name = "senha")
     private String senha;
 
+    @NotNull
+    @Size(min = 3,max = 15)
+    @Column(name = "telefone")
+    private String telefone;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "usuario_permissao",joinColumns = @JoinColumn(name = "codigo_usuario"),
     inverseJoinColumns = @JoinColumn(name = "codigo_permissao"))
@@ -77,6 +82,14 @@ public class Usuario implements Serializable {
 
     public void setPermissoes(List<Permissao> permissoes) {
         this.permissoes = permissoes;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
     }
 
     @Override
