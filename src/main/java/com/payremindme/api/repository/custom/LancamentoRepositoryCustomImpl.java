@@ -166,12 +166,7 @@ public class LancamentoRepositoryCustomImpl implements LancamentoRepositoryCusto
     }
 
     private void adicionaRestricaoPaginacao(TypedQuery<?> query, Pageable pageable) {
-        int paginaAtual = pageable.getPageNumber();
-        int totalRegistrosPagina = pageable.getPageSize();
-        int primeiroRegistroPagina = paginaAtual * totalRegistrosPagina;
-
-        query.setFirstResult(primeiroRegistroPagina);
-        query.setMaxResults(totalRegistrosPagina);
+        PessoaRepositoryCustomImpl.adiciona(query, pageable);
 
     }
 

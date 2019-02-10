@@ -54,13 +54,17 @@ public class PessoaRepositoryCustomImpl implements PessoaRepositoryCustom {
     }
 
     private void adicionaRestricaoPaginacao(TypedQuery<?> query, Pageable pageable) {
+        adiciona(query, pageable);
+
+    }
+
+    static void adiciona(TypedQuery<?> query, Pageable pageable) {
         int paginaAtual = pageable.getPageNumber();
         int totalRegistrosPagina = pageable.getPageSize();
         int primeiroRegistroPagina = paginaAtual * totalRegistrosPagina;
 
         query.setFirstResult(primeiroRegistroPagina);
         query.setMaxResults(totalRegistrosPagina);
-
     }
 
     private Predicate[] criarRestricoes(PessoaFilter pessoaFilter, CriteriaBuilder criteriaBuilder, Root<Pessoa> root) {
