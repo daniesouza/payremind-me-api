@@ -13,3 +13,7 @@ username = daniesouza@gmail.com
 pass = admin
 
 Sistema de Lembrete de pagamentos - API
+
+#### Visão Geral da Arquitetura
+
+![Classes](docs/arquitetura.jpeg)
